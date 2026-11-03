@@ -121,17 +121,6 @@ app.get('/api/admin/results', auth, need('admin'), (req, res) => {
   res.json({ title: t.title, questions: t.questions.map(q => ({ id: q.id, text: q.text })), results: rows });
 });
 
-app.get('/api/admin/results.csv', auth, need('admin'), (req, res) => {
-  const { t, rows } = results();
-  const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
-  const head = ['Логин', 'Баллы', 'Всего', 'Дата (UTC)', ...t.questions.map((q, i) => 'Вопрос ' + (i + 1))];
-  const lines = [head.map(esc).join(',')].concat(rows.map(r =>
-    [r.username, r.score, r.total, r.created_at, ...r.details.map(d => (d.ok ? 1 : 0))].map(esc).join(',')));
-  res.set('Content-Type', 'text/csv; charset=utf-8');
-  res.set('Content-Disposition', 'attachment; filename="results.csv"');
-  res.send('\ufeff' + lines.join('\r\n'));
-});
-
 // Удалить результат, чтобы студент мог пройти тест заново
 app.delete('/api/admin/results/:id', auth, need('admin'), (req, res) => {
   db.prepare('DELETE FROM attempts WHERE id = ?').run(Number(req.params.id));
