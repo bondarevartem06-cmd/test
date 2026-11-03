@@ -39,7 +39,11 @@ function variantFor(userId, t) {
   const row = db.prepare('SELECT variant FROM assignments WHERE user_id = ?').get(userId);
   let v = row && t.variants.find(x => String(x.id) === row.variant);
   if (!v) {
-    v = t.variants[randomInt(t.variants.length)];
+    // Выбираем случайно среди наименее выданных вариантов: раздача выходит ровной (A, B, C, ...), порядок случайный
+    const cnt = Object.fromEntries(db.prepare('SELECT variant, COUNT(*) AS n FROM assignments GROUP BY variant').all().map(r => [r.variant, r.n]));
+    const min = Math.min(...t.variants.map(x => cnt[String(x.id)] || 0));
+    const pool = t.variants.filter(x => (cnt[String(x.id)] || 0) === min);
+    v = pool[randomInt(pool.length)];
     db.prepare('INSERT OR REPLACE INTO assignments (user_id, variant) VALUES (?, ?)').run(userId, String(v.id));
   }
   return v;
@@ -59,7 +63,7 @@ function auth(req, res, next) {
 const need = role => (req, res, next) =>
   req.user.role === role ? next() : res.status(403).json({ error: 'Нет доступа' });
 const validCreds = (u, p) =>
-  typeof u === 'string' && typeof p === 'string' && /^[\w.\-@ ]{3,40}$/.test(u) && p.length >= 6 && p.length <= 100;
+  typeof u === 'string' && typeof p === 'string' && /^[\p{L}\p{N}_.\-@ ]{3,40}$/u.test(u) && p.length >= 6 && p.length <= 100;
 
 // ---------- auth ----------
 app.post('/api/register', (req, res) => {
