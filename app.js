@@ -106,13 +106,38 @@ async function adminView() {
   });
 }
 
+// ---- Защита: запрет выделения/копирования, чёрный экран при потере фокуса и PrintScreen ----
+const shield = document.createElement('div');
+shield.id = 'shield';
+shield.textContent = 'Содержимое скрыто. Вернитесь на вкладку с тестом и нажмите на экран.';
+document.body.appendChild(shield);
+const secure = () => document.body.classList.contains('secure');
+const hide = () => { if (secure()) shield.classList.add('on'); };
+const show = () => shield.classList.remove('on');
+function setSecure(on) { document.body.classList.toggle('secure', on); if (!on) show(); }
+['contextmenu', 'copy', 'cut', 'dragstart', 'selectstart'].forEach(ev =>
+  document.addEventListener(ev, e => { if (secure()) e.preventDefault(); }));
+document.addEventListener('keydown', e => {
+  if (!secure()) return;
+  const k = e.key.toLowerCase();
+  if (e.key === 'PrintScreen') { hide(); try { navigator.clipboard.writeText(''); } catch (_) {} e.preventDefault(); }
+  if (e.key === 'F12' || (e.ctrlKey || e.metaKey) && ['c', 'a', 'p', 's', 'u', 'x'].includes(k) ||
+      (e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c', 's'].includes(k)) e.preventDefault();
+});
+document.addEventListener('keyup', e => { if (e.key === 'PrintScreen') hide(); });
+document.addEventListener('visibilitychange', () => { document.hidden ? hide() : null; });
+window.addEventListener('blur', hide);
+shield.addEventListener('click', show);
+window.addEventListener('focus', () => { if (!document.hidden) show(); });
+
 async function init() {
   try {
     const me = await api('/api/me');
     header(me);
+    setSecure(me.role === 'student');
     me.role === 'admin' ? await adminView() : await testView();
   } catch (e) {
-    if (e.status === 401) { const c = await api('/api/config'); authView(c.allowRegistration); }
+    if (e.status === 401) { setSecure(false); const c = await api('/api/config'); authView(c.allowRegistration); }
     else view.innerHTML = '<p class="bad">' + esc(e.message) + '</p>';
   }
 }

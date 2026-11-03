@@ -24,3 +24,9 @@ button:disabled{opacity:.5}
 table{border-collapse:collapse;width:100%}
 th,td{border-bottom:1px solid var(--bd);padding:8px;text-align:left;font-size:.92rem;white-space:nowrap}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* ---- защита от копирования (только для студентов во время теста) ---- */
+body.secure, body.secure *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+@media print{body.secure *{display:none!important}}
+#shield{display:none;position:fixed;inset:0;z-index:99999;background:#000;color:#bbb;align-items:center;justify-content:center;text-align:center;padding:24px;font-size:1.1rem}
+#shield.on{display:flex}
