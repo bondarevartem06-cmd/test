@@ -24,4 +24,11 @@ CREATE TABLE IF NOT EXISTS attempts (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 `);
+db.exec(`
+CREATE TABLE IF NOT EXISTS assignments (
+  user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  variant TEXT NOT NULL
+);
+`);
+try { db.exec('ALTER TABLE attempts ADD COLUMN variant TEXT'); } catch (e) { /* колонка уже есть */ }
 module.exports = db;
