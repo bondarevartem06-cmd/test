@@ -1,12 +1,12 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const Database = require('better-sqlite3');
+const { DatabaseSync } = require('node:sqlite'); // встроен в Node.js 22.13+, ничего компилировать не нужно
 
 const dir = path.resolve(process.env.DATA_DIR || './data');
 fs.mkdirSync(dir, { recursive: true });
-const db = new Database(path.join(dir, 'quiz.db'));
-db.pragma('journal_mode = WAL');
+const db = new DatabaseSync(path.join(dir, 'quiz.db'));
+db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
 db.exec(`
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
