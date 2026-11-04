@@ -13,7 +13,7 @@ function fail(m) { console.error(m); process.exit(1); }
 (async () => {
   const username = process.argv[2] || (await ask('Логин администратора: '));
   const password = process.argv[3] || (await ask('Пароль (не менее 8 символов): '));
-  if (!/^[\w.\-@]{3,40}$/.test(username)) return fail('Логин: 3-40 символов (буквы, цифры, _ . - @)');
+  if (!/^[\p{L}\p{N}_.\-@ ]{3,40}$/u.test(username)) return fail('Логин: 3-40 символов (буквы, цифры, _ . - @)');
   if (password.length < 8) return fail('Пароль слишком короткий');
   const hash = bcrypt.hashSync(password, 12);
   const ex = db.prepare('SELECT id FROM users WHERE username = ?').get(username);
