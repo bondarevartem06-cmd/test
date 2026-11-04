@@ -22,8 +22,7 @@
           "id": "q1",
           "text": "Найдите A − B.",
           "matrices": [
-            { "label": "A", "data": [[5, 6], [7, 8]] },
-            { "label": "B", "data": [[1, 1], [2, 2]] }
+            
           ],
           "options": ["kjhgfds", [[4, 5], [5, 7]]],
           "correct": 0
@@ -37,7 +36,7 @@
         {
           "id": "q1",
           "text": "Найдите 2·A.",
-          "matrices": [{ "label": "A", "data": [[1, 2], [3, 4]] }],
+          "matrices": [],
           "options": ["ihkjgfd", [[3, 4], [5, 6]]],
           "correct": 0
         },
