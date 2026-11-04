@@ -8,8 +8,6 @@
           "id": "q1",
           "text": "Найдите A + B.",
           "matrices": [
-            { "label": "A", "data": [[1, 2], [3, 4]] },
-            { "label": "B", "data": [[0, 1], [1, 0]] }
           ],
           "options": ["qwerty", [[1, 3], [3, 4]]],
           "correct": 1
