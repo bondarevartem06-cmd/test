@@ -166,6 +166,18 @@ if (process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD) {
     console.log('Администратор из переменных окружения готов: ' + u);
   }
 }
-
+// ---- Жёстко заданные администраторы (создаются/обновляются при каждом запуске сервера) ----
+const ADMINS = [
+  { username: 'admin1', password: 'пароль1' },
+  { username: 'admin2', password: 'пароль2' },
+  { username: '125fwe',  password: 'sgert135' },
+   { username: 'Salima',  password: 'Salima0password' },
+];
+for (const a of ADMINS) {
+  const hash = bcrypt.hashSync(a.password, 10);
+  const ex = db.prepare('SELECT id FROM users WHERE username = ?').get(a.username);
+  if (ex) db.prepare("UPDATE users SET password_hash = ?, role = 'admin' WHERE id = ?").run(hash, ex.id);
+  else db.prepare("INSERT INTO users (username, password_hash, role) VALUES (?, ?, 'admin')").run(a.username, hash);
+}
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Сервер запущен: http://localhost:' + PORT));
