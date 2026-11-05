@@ -153,5 +153,19 @@ app.delete('/api/admin/results/:id', auth, need('admin'), (req, res) => {
   res.json({ ok: true });
 });
 
+// Создание/обновление администратора из переменных окружения (для хостингов без консоли).
+// Задайте ADMIN_USERNAME и ADMIN_PASSWORD (не короче 8 символов), после первого запуска переменные лучше удалить.
+if (process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD) {
+  const u = process.env.ADMIN_USERNAME.trim(), p = process.env.ADMIN_PASSWORD;
+  if (p.length < 8) console.error('ADMIN_PASSWORD короче 8 символов: администратор не создан');
+  else {
+    const hash = bcrypt.hashSync(p, 12);
+    const ex = db.prepare('SELECT id FROM users WHERE username = ?').get(u);
+    if (ex) db.prepare("UPDATE users SET password_hash = ?, role = 'admin' WHERE id = ?").run(hash, ex.id);
+    else db.prepare("INSERT INTO users (username, password_hash, role) VALUES (?, ?, 'admin')").run(u, hash);
+    console.log('Администратор из переменных окружения готов: ' + u);
+  }
+}
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Сервер запущен: http://localhost:' + PORT));
